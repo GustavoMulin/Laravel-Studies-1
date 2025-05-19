@@ -1,8 +1,11 @@
 <?php
 
 use App\Http\Controllers\MainController;
+use App\Http\Controllers\UserController;
+use App\Http\Middleware\OnlyAdmin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Pest\Plugins\Only;
 
 // Assinatura base de uma route
 // Route::verb('url', callback); O call back é a ação que vai ser executada quando a rota for acionada
@@ -75,3 +78,48 @@ Route::get('/exp3/{value1}/{value2}', function($value1, $value2) {
     'value1' => '[0-9]+',
     'value2' => '[A-za-z]+'
 ]);
+
+// --------------------------------------
+// ROUTE NAMES
+// --------------------------------------
+
+Route::get('/rota_abc', function(){
+    return "Rota nomeada";
+})->name('rota_nomeada');
+
+Route::get('/rota_referenciada', function(){
+    return redirect()->route('rota_nomeada');
+});
+
+Route::prefix('admin')->group(function(){
+    Route::get('/home', [MainController::class, 'index']);
+    Route::get('/about', [MainController::class, 'about']);
+    Route::get('/manage', [MainController::class, 'manage']);
+});
+
+Route::get('/admin/only', function(){
+    echo "Apenas administradores";
+})->middleware([OnlyAdmin::class]);
+
+Route::middleware([OnlyAdmin::class])->group(function(){
+    Route::get('/admin/only2', function(){
+        return 'Apenas administradores 1';
+    });
+    Route::get('/admin/only3', function(){
+        return 'Apenas administradores 2';
+    });
+});
+
+Route::get('/new', [UserController::class, 'new']);
+Route::get('/edit', [UserController::class, 'edit']);
+Route::get('/delete', [UserController::class, 'delete']);
+
+Route::controller(UserController::class)->group(function(){
+    Route::get('/user/new', 'new');
+    Route::get('/user/edit', 'edit');
+    Route::get('/user/delete', 'delete');
+});
+
+Route::fallback(function(){
+    echo "Página não encontrada";
+});
