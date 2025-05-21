@@ -20,6 +20,6 @@ class EndMiddleware
         // executado depois da resposta
         echo "<p>End Middleware</p>";
 
-        return $next($request);
+        return $response;
     }
 }
